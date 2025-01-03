@@ -48,6 +48,9 @@ const httpProxy = require('http-proxy');
           body = body.replace(t[0], t[1]);
         }
 
+        for (const [key, value] of Object.entries(proxyRes.getHeaders())) {
+          res.setHeader(key, value);
+        }
         res.end(body);
       });
     });
