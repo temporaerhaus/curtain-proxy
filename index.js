@@ -29,9 +29,7 @@ const httpProxy = require('http-proxy');
           selfHandleResponse: true,
           changeOrigin: true,
           ignorePath: true
-        }, (e) => {
-          console.log('hmm', e);
-        });
+        }, (e) => console.log(e));
       } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.write('Not Found!');
@@ -48,9 +46,10 @@ const httpProxy = require('http-proxy');
           body = body.replace(t[0], t[1]);
         }
 
-        for (const [key, value] of Object.entries(proxyRes.getHeaders())) {
+        for (const [key, value] of Object.entries(proxyRes.headers)) {
           res.setHeader(key, value);
         }
+
         res.end(body);
       });
     });
