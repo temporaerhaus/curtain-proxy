@@ -2,9 +2,32 @@ require('dotenv').config();
 
 const http = require('http');
 const httpProxy = require('http-proxy');
+const fs = require('fs/promises');
+const path = require('path');
 
 (async () => {
   const proxies = {};
+  const plugins = [];
+
+  if (process.env['CURTAIN_PLUGINS']) {
+      try {
+          const files = await fs.readdir(process.env['CURTAIN_PLUGINS']);
+          for (const file of files) {
+              try {
+                  plugins.push(require(
+                      path.resolve(
+                          __dirname,
+                          path.join(process.env['CURTAIN_PLUGINS'], file)
+                      )
+                  ));
+              } catch (e) {
+                  console.error('[error] loading plugin', file, e);
+              }
+          }
+      } catch (e) {
+          console.error('[error] loading plugins', e);
+      }
+  }
 
   try {
     const proxy = httpProxy.createProxyServer({});
@@ -44,6 +67,15 @@ const httpProxy = require('http-proxy');
         let body = Buffer.concat(chunks).toString();
         for (const t of proxies[req.url].transformers) {
           body = body.replace(t[0], t[1]);
+        }
+
+        if (plugins.length) {
+            const [mainmatter, backmatter] = body.split('END:VCALENDAR', 2);
+            let events = mainmatter.split('BEGIN:VEVENT');
+            const frontmatter = events.shift();
+
+            events = events.map(e => plugins.reduce((s, p) => p(`BEGIN:VEVENT${s}`), e));
+            body = [frontmatter, events.join(''), 'END:VCALENDAR', backmatter].join('');
         }
 
         for (const [key, value] of Object.entries(proxyRes.headers)) {

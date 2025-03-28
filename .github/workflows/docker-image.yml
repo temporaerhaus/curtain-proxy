@@ -23,6 +23,6 @@ jobs:
       - name: 'Build Inventory Image'
         run: |
           docker build . --tag ghcr.io/temporaerhaus/curtain-proxy:latest --tag ghcr.io/temporaerhaus/curtain-proxy:$(date -I)
-          docker push ghcr.io/temporaerhaus/curtain-proxy:latest
+          docker push ghcr.io/temporaerhaus/curtain-proxy:$(date -I)
           docker push ghcr.io/temporaerhaus/curtain-proxy:latest
 
