@@ -74,7 +74,7 @@ const path = require('path');
             let events = mainmatter.split('BEGIN:VEVENT');
             const frontmatter = events.shift();
 
-            events = events.map(e => plugins.reduce((s, p) => p(`BEGIN:VEVENT${s}`), e));
+            events = events.map(e => plugins.reduce((s, p) => p(`BEGIN:VEVENT${s}`, req.url), e));
             body = [frontmatter, events.join(''), 'END:VCALENDAR', backmatter].join('');
         }
 
